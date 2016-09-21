@@ -1,0 +1,3 @@
+---
+- src: git+http://github.com/novafloss/ansible-ssh-agent.git
+  name: novafloss.ssh-agent
