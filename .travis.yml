@@ -18,4 +18,4 @@ install:
 - ansible-galaxy install -p . -r test-requirements.yml
 
 script:
-- sg lxd 'ansible-playbook -v test.yml'
+- ansible-playbook -v test.yml --sudo
