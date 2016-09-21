@@ -1,79 +1,45 @@
 ---
 
-- name: Ensure SSH home dir exists
-  file:
-    path: '{{ ssh_home }}'
-    owner: '{{ owner }}'
-    mode: 0700
-
-- name: Ensure SSH config exists
-  file:
-    path: '{{ ssh_home }}/config'
-    state: touch
-    owner: '{{ owner }}'
-    mode: 0700
-  changed_when: false
-
-- name: Ensure there is a public key
-  shell: ssh-keygen -f {{ ssh_private_key }} -N ''
-  args:
-    creates: '{{ ssh_private_key }}'
-
-- name: Ensure the keys have restricted permissions
-  file:
-    path: '{{ item }}'
-    owner: '{{ owner }}'
-    mode: 0600
-  with_items:
-  - '{{ ssh_private_key }}'
-  - '{{ ssh_public_key }}'
-
-# Just for debugging.
-- name: enable ssh-agent
-  shell: echo "ssh-agent = $(ssh-agent)"
-  when: '"SSH_AUTH_SOCK" in ansible_env'
-
-- name: enable ssh-agent
-  shell: eval $(ssh-agent)
-  when: '"SSH_AUTH_SOCK" in ansible_env'
-
-- name: Ensure SSH to containers is permissive
-  blockinfile:
-    dest: '{{ ssh_home }}/config'
-    block: |
-      Host *.lxc
-          # No need for security for disposable test containers
-          UserKnownHostsFile /dev/null
-          StrictHostKeyChecking no
-          User root
-      Host *.lxd
-          # No need for security for disposable test containers
-          UserKnownHostsFile /dev/null
-          StrictHostKeyChecking no
-          User root
-
-- name: Drop containers
+- name: Start container
   lxc_container:
     name: '{{ item.split(".")[0] }}'
-    state: absent
+    template: '{{ hostvars[item].get("lxc_template", "debian") }}'
+    state: started
+    template_options: '{{ hostvars[item].get("lxc_template_options", "") }}'
     lxc_path: '{{ hostvars[item].get("lxc_path", lxc_path) }}'
-  when: lxc_drop_containers and item.split('.')[-1] in ('lxc', 'lxd')
+    container_log: true
+    container_log_level: DEBUG
+  when: item.split('.')[-1] == 'lxc'
   with_items: '{{ groups["all"] }}'
 
-- name: Checking if lxc is installed
-  shell: hash lxc-create
-  register: lxc_installed
-  ignore_errors: yes
+- name: Add your ssh key to the container
+  authorized_key:
+    key: '{{ lookup("file", ssh_public_key ) }}'
+    path: '{{ lxc_path }}/{{ item.split(".")[0] }}/rootfs/root/.ssh/authorized_keys'
+    user: root
+  when: item.split('.')[-1] == 'lxc'
+  with_items: '{{ groups["all"] }}'
 
-- name: Checking if lxd is installed
-  shell: hash lxd
-  register: lxd_installed
-  ignore_errors: yes
+- name: Wait for containers to start sshd
+  wait_for:
+    host: '{{ item }}'
+    port: 22
+    search_regex: OpenSSH
+  when: item.split('.')[-1] == 'lxc'
+  with_items: '{{ groups["all"] }}'
 
-- include: lxc.yml
-  tags: lxc
-  when: lxc_installed|success
+- name: Install python in container
+  raw: if ! hash python2; then apt-get update -y && apt-get install -y python; fi
+  become: no
+  delegate_to: '{{ item }}'
+  when: item.split('.')[-1] == 'lxc'
+  with_items: '{{ groups["all"] }}'
 
-- include: lxd.yml
-  tags: lxd
-  when: lxd_installed|success
+- name: Install sudo in container
+  apt:
+    name: sudo
+    update_cache: yes
+  become: no
+  delegate_to: '{{ item }}'
+  when: item.split('.')[-1] == 'lxc'
+  with_items: '{{ groups["all"] }}'

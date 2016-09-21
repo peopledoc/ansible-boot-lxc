@@ -4,17 +4,11 @@
   become: true
   become_user: root
   become_method: sudo
-  vars:
-    test_lxc: true
-    test_lxd: true
   pre_tasks:
   - add_host: name=testboot.lxc groups=testboot
-    when: test_lxc
-  - add_host: name=testboot.lxd groups=testboot
-    when: test_lxd
-  - add_host: name=testbootalpine.lxd groups=testboot lxd_alias=alpine/3.4/amd64
-    when: test_lxd
   roles:
+  - role: novafloss.ssh-agent
+    ssh_insecure: ['*.lxc']
   - .
 
 - hosts: testboot
