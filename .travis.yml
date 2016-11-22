@@ -6,9 +6,11 @@ python:
 - '2.7'
 
 env:
+  global:
+    - ANSIBLE_STDOUT_CALLBACK=debug
   matrix:
   - ANSIBLE_REF=devel
-  - ANSIBLE_REF=stable-2.1
+  - ANSIBLE_REF=stable-2.2
 
 install:
 - travis_retry wget https://raw.githubusercontent.com/novafloss/ansible-setup/rewrite/ansible-setup
@@ -19,3 +21,5 @@ install:
 
 script:
 - ansible-playbook -v test.yml --sudo
+- ansible-playbook -v test.yml --sudo -e lxc_clean=1
+- test -z $(sudo lxc-ls)

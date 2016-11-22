@@ -1,0 +1,8 @@
+---
+
+- name: Drop container
+  lxc_container:
+    name: '{{ item.split(".")[0] }}'
+    state: absent
+  when: item.split('.')[-1] == 'lxc'
+  with_items: '{{ groups["all"] }}'
