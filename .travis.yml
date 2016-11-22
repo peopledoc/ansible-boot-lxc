@@ -19,3 +19,5 @@ install:
 
 script:
 - ansible-playbook -v test.yml --sudo
+- ansible-playbook -v test.yml --sudo -e lxc_clean=1
+- test -z $(sudo lxc-ls)
