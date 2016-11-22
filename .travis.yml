@@ -10,7 +10,7 @@ env:
     - ANSIBLE_STDOUT_CALLBACK=debug
   matrix:
   - ANSIBLE_REF=devel
-  - ANSIBLE_REF=stable-2.1
+  - ANSIBLE_REF=stable-2.2
 
 install:
 - travis_retry wget https://raw.githubusercontent.com/novafloss/ansible-setup/rewrite/ansible-setup
