@@ -3,7 +3,6 @@
 - hosts: localhost
   become: true
   become_user: root
-  become_method: sudo
   pre_tasks:
   - add_host:
       name: testboot.lxc
