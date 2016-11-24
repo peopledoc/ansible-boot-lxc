@@ -1,12 +1,11 @@
 This role instanciates any inventory host that ends with ``.lxc`` and sets it
 up for ansible: install python, add your ssh key for root.
 
-Note that you need ``lxc``, ``dsnmasq``, and ``sudo`` to be properly
-configured. And ``lxc-python2`` (which require ``lxc-dev``) installed in your
-ansible environement. That means that you can create a container with internet
-access and that you can resolve it by ``name.lxc``. One way to set this up is
-to use `novafloss/ansible-setup
-<https://github.com/novafloss/ansible-setup>`_
+Note that you need ``lxc``, ``dsnmasq``, and ``sudo`` to be properly configured.
+And ``lxc-python2`` (which require ``lxc-dev``) installed in your ansible
+environment. That means that you can create a container with internet access and
+that you can resolve it by ``name.lxc``. One way to set this up is to use
+`novafloss/ansible-setup <https://github.com/novafloss/ansible-setup>`_
 
 Consider this example inventory::
 
