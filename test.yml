@@ -11,8 +11,6 @@
       lxc_container_config:
       - "lxc.mount.entry={{ playbook_dir }} srv none defaults,bind,create=dir,uid=0 0 0"
   roles:
-  - role: novafloss.ssh-agent
-    ssh_insecure: ['*.lxc']
   - .
 
 - hosts: testboot

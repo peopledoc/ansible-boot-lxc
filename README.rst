@@ -25,9 +25,7 @@ And a playbook like that::
     - hosts: localhost
       become: true
       become_user: root
-      become_method: sudo
       roles:
-      - novafloss.ssh-agent
       - novafloss.boot-lxc
 
     - hosts: redis
@@ -41,8 +39,3 @@ And a playbook like that::
 First, novafloss.boot-lxc will start the containers and create them if they
 don't exist, then plays will be executed normally on rabbitmq and redis
 container hosts.
-
-Note that it uses `novafloss.ssh-agent role
-<https://github.com/novafloss/ansible-ssh-agent>`_ to ensure that an SSH agent
-is working on the host. While that may not be necessary on your machine, it's
-required to execute on fresh containers ie. in CI environments.
