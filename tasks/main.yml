@@ -1,4 +1,14 @@
 ---
+- name: Setup SSH for LXC
+  blockinfile:
+    marker: "# {mark} ANSIBLE BOOT LXC MANAGED BLOCK"
+    dest: '{{ ssh_home }}/config'
+    block: |
+      Host *.lxc
+          # No need for security for disposable test containers
+          UserKnownHostsFile /dev/null
+          StrictHostKeyChecking no
+          User root
 
 - name: Start container
   lxc_container:
