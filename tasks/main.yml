@@ -45,6 +45,8 @@
   delegate_to: '{{ item }}'
   when: item.split('.')[-1] == 'lxc'
   with_items: '{{ groups["all"] }}'
+  register: out
+  until: out|succeeded
   retries: 30
 
 - name: Install sudo in container
