@@ -43,6 +43,7 @@
 - name: Install python in container
   raw: if ! hash python2; then apt-get update -y && apt-get install -y python; fi
   become: no
+  remote_user: root
   delegate_to: '{{ item }}'
   when: item.split('.')[-1] == 'lxc'
   with_items: '{{ groups["all"] }}'
@@ -55,6 +56,7 @@
     name: sudo
     update_cache: yes
   become: no
+  remote_user: root
   delegate_to: '{{ item }}'
   when: item.split('.')[-1] == 'lxc'
   with_items: '{{ groups["all"] }}'
