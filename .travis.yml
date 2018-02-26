@@ -1,5 +1,5 @@
 sudo: required
-dist: trusty
+dist: xenial
 
 language: python
 python:
@@ -8,7 +8,7 @@ python:
 env:
   matrix:
   - ANSIBLE_REF=devel
-  - ANSIBLE_REF=stable-2.1
+  - ANSIBLE_REF=stable-2.4
 
 install:
 - travis_retry wget https://raw.githubusercontent.com/novafloss/ansible-setup/rewrite/ansible-setup
