@@ -3,11 +3,21 @@ dependency:
   name: galaxy
 driver:
   name: delegated
+  options:
+    ansible_connection_options:
+      connection: local
 lint:
   name: yamllint
 platforms:
+  - name: delegated-travis-instance
 provisioner:
   name: ansible
+  options:
+    vvv: True
+  inventory:
+    host_vars:
+      delegated-travis-instance:
+        ansible_connection: local
   lint:
     name: ansible-lint
 scenario:
