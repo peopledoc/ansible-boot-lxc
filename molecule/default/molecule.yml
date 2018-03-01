@@ -8,6 +8,7 @@ driver:
       connection: local
 lint:
   name: yamllint
+  enabled: False
 platforms:
   - name: delegated-travis-instance
 provisioner:
@@ -20,6 +21,7 @@ provisioner:
         ansible_connection: local
   lint:
     name: ansible-lint
+    enabled: False
 scenario:
   name: default
 verifier:
