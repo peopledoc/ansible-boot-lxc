@@ -1,0 +1,49 @@
+---
+- name: Prepare
+  hosts: all
+  gather_facts: false
+  become: yes
+  tasks:
+
+    - name: Add up to date LXC repository
+      apt_repository:
+        repo: 'ppa:ubuntu-lxc/stable'
+    - name: Install required Debian packages
+      package:
+        name: '{{ item }}'
+        state: present
+        install_recommends: no
+        update_cache: yes
+      with_items:
+        - lxc
+        - lxc-templates
+        - debootstrap # for debian LXC template creation
+        - lxc-dev # build dependency for lxc-python2
+        - gcc # build dependency for lxc-python2
+        - python2.7-dev # build dependency for lxc-python2
+        - iproute2 # lxc-net uses /bin/ip
+        - dnsmasq # in order to resolve lxc domain
+        - python-virtualenv
+        - openssh-client # provides ssh-keygen
+      register: out
+      until: out is succeeded
+      retries: 30
+
+    - name: Install required lxc-python2 Python package
+      pip:
+        name: lxc-python2
+        state: present
+        virtualenv_python: python2.7
+        virtualenv: '$HOME/virtualenv/python2.7'
+      become: no
+      register: out
+      until: out is succeeded
+      retries: 30
+
+    - command: ssh-keygen -f '$HOME/.ssh/id_rsa' -N ''
+      args:
+        creates: '$HOME/.ssh/id_rsa'
+      become: no
+
+    - name: Configure dnsmasq
+      script: setup_dnsmasq.sh

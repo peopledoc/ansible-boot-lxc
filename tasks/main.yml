@@ -40,12 +40,24 @@
   when: item.split('.')[-1] == 'lxc'
   with_items: '{{ groups["all"] }}'
 
-- name: Install python in container
-  raw: if ! hash python2; then apt-get update -y && apt-get install -y python; fi
+- name: Check python availability
+  raw: hash python2
   become: no
-  delegate_to: '{{ item }}'
-  when: item.split('.')[-1] == 'lxc'
+  delegate_to: '{{ host }}'
+  when: host.split('.')[-1] == 'lxc'
   with_items: '{{ groups["all"] }}'
+  loop_control:
+    loop_var: host
+  ignore_errors: True
+  changed_when: False
+  register: python_available
+
+- name: Install python in container
+  raw: apt-get update -y && apt-get install -y python
+  become: no
+  delegate_to: '{{ item.host }}'
+  when: item is failed
+  with_items: '{{ python_available.results }}'
   register: out
   until: out|succeeded
   retries: 30
@@ -58,4 +70,6 @@
   delegate_to: '{{ item }}'
   when: item.split('.')[-1] == 'lxc'
   with_items: '{{ groups["all"] }}'
+  register: out
+  until: out|succeeded
   retries: 30
