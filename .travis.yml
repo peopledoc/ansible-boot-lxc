@@ -7,12 +7,12 @@ python:
 
 env:
   matrix:
-  - ANSIBLE_REF=2.4.3.0
-  - ANSIBLE_REF=2.3.3.0
+  - ANSIBLE_REF='ansible<2.6'
+  - ANSIBLE_REF='ansible<2.5'
 
 install:
   - pip install --upgrade pip setuptools wheel
-  - pip install ansible==${ANSIBLE_REF} molecule docker-py
+  - pip install "${ANSIBLE_REF}" molecule docker-py
 
 script:
 - molecule --debug test --driver-name delegated
