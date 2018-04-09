@@ -3,3 +3,4 @@
   with_items: '{{ groups["all"] }}'
   loop_control:
     loop_var: host
+  run_once: yes

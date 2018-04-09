@@ -1,4 +1,5 @@
 - when: host.split('.')[-1] == 'lxc'
+  delegate_to: localhost
   block:
   - name: Start container
     lxc_container:
