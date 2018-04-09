@@ -16,7 +16,9 @@ def test_lxc_container():
             'children': {
                 'lxc': {
                     'hosts': {
-                        'testboot.lxc': {}
+                        'testboot.lxc': {
+                            'ansible_user': 'root'
+                        }
                     }
                 },
                 'ungrouped': {}
