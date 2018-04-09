@@ -1,0 +1,58 @@
+- when: host.split('.')[-1] == 'lxc'
+  block:
+  - name: Start container
+    lxc_container:
+      name: '{{ host.split(".")[0] }}'
+      template: '{{ hostvars[host].get("lxc_template", "debian") }}'
+      state: started
+      template_options: '{{ hostvars[host].get("lxc_template_options", "") }}'
+      container_config: '{{ hostvars[host].get("lxc_container_config", []) }}'
+      lxc_path: '{{ hostvars[host].get("lxc_path", lxc_path) }}'
+      container_log: true
+      container_log_level: DEBUG
+
+  - name: Setup SSH for LXC
+    add_host:
+      name: '{{ host }}'
+      ansible_ssh_common_args: '{{ lxc_ssh_common_args }}'
+      ansible_user: root
+    changed_when: False
+
+  - name: Add your ssh key to the container
+    authorized_key:
+      key: '{{ lookup("file", ssh_public_key ) }}'
+      path: '{{ lxc_path }}/{{ host.split(".")[0] }}/rootfs/root/.ssh/authorized_keys'
+      user: root
+
+  - name: Wait for containers to start sshd
+    wait_for:
+      host: '{{ host }}'
+      port: 22
+      search_regex: OpenSSH
+
+  - name: Check python availability
+    raw: hash python2
+    become: no
+    delegate_to: '{{ host }}'
+    ignore_errors: True
+    changed_when: False
+    register: python_available
+
+  - name: Install python in container
+    raw: apt-get update -y && apt-get install -y python
+    become: no
+    delegate_to: '{{ host }}'
+    when: python_available is failed
+    register: out
+    until: out|succeeded
+    retries: 30
+
+  - name: Install sudo in container
+    apt:
+      name: sudo
+      update_cache: yes
+    become: no
+    delegate_to: '{{ host }}'
+    register: out
+    until: out|succeeded
+    retries: 30
